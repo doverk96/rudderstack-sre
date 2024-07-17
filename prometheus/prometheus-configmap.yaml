@@ -1,0 +1,48 @@
+# kubectl apply -f prometheus/prometheus-configmap.yaml;kubectl delete pods -l app=prometheus -n monitoring; kubectl get pods -n monitoring -l app=prometheus
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      evaluation_interval: 1m
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets:
+          - alertmanager-service.monitoring.svc.cluster.local:9093
+    rule_files:
+      - /etc/prometheus/alert.rules.yml
+    scrape_configs:
+    - job_name: 'kube-state-metrics'
+      static_configs:
+        - targets: ['kube-state-metrics.kube-system:8080']
+  alert.rules.yml: |
+    groups:
+    - name: KubePodCrashLooping
+      rules:      
+      - alert: KubePodCrashLooping
+        expr: |
+          rate(kube_pod_container_status_restarts_total{namespace!="",pod!="",container!=""}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          priority: P1
+        annotations:
+          summary: "Container {{ $labels.container }} in Pod {{ $labels.pod }} of Namespace {{ $labels.namespace }} is crashlooping."
+          description: "Container {{ $labels.container }} in Pod {{ $labels.pod }} of Namespace {{ $labels.namespace }} is crashlooping."
+    - name: ImagePullError
+      rules:
+      - alert: ImagePullError
+        expr: kube_pod_container_status_waiting_reason{reason="ImagePullBackOff"} > 0
+        for: 1m
+        labels:
+          severity: warning
+          priority: P0
+        annotations:
+          summary: "Container {{ $labels.container }} in Pod {{ $labels.pod }} of Namespace {{ $labels.namespace }} is failing to pull the container image."
+          description: "Container {{ $labels.container }} in Pod {{ $labels.pod }} of Namespace {{ $labels.namespace }} is failing to pull the container image."

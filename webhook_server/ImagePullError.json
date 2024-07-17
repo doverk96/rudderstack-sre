@@ -1,0 +1,20 @@
+{
+    "alerts": 
+    [
+        {
+            "labels": 
+            {
+                "alertname": "ImagePullError", 
+                "container": "webhook",
+                "namespace": "test", 
+                "pod": "alertmanager-webhook-crashloop-69688d749d-5llkr"
+            }, 
+            "annotations": 
+            {
+                "description": "Pod alertmanager-webhook-crashloop-69688d749d-5llkr in Namespace test is failing to pull the container image for more than 5 minutes.", "summary": "Image Pull Error detected on Pod alertmanager-webhook-crashloop-69688d749d-5llkr"
+            }
+        }
+    ]
+}
+
+curl localhost:5000/alert -X POST -H "Content-Type: application/json" -d @ImagePullError.json

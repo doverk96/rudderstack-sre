@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-webhook
+  namespace: rudderstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-webhook
+  template:
+    metadata:
+      labels:
+        app: alertmanager-webhook
+    spec:
+      containers:
+      - name: webhook
+        image: python:imagePullError-20240711
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000

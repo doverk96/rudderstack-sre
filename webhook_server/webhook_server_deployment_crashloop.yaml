@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-webhook-crashloop
+  namespace: rudderstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-webhook-crashloop
+  template:
+    metadata:
+      labels:
+        app: alertmanager-webhook-crashloop
+    spec:
+      containers:
+      - name: webhook
+        image: python:crashloop
+        ports:
+        - containerPort: 5000

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-webhook
+  namespace: rudderstack
+spec:
+  selector:
+    app: alertmanager-webhook
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
